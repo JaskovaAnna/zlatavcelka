@@ -1005,15 +1005,14 @@ ul  { list-style: none; }
 }
 
 .footer__demo-bar {
-  background: rgba(0, 0, 0, 0.25);
   text-align: center;
-  padding: 0.55rem 1.5rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.45);
+  padding: 0.6rem 1.5rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .footer__demo-bar strong {
-  color: var(--color-honey);
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 600;
 }
 
