@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
+  <!-- Outer ring -->
+  <circle cx="22" cy="22" r="21" fill="#E8A020"/>
+  <circle cx="22" cy="22" r="17.5" fill="none" stroke="#C47D0A" stroke-width="1"/>
+  <!-- Initials -->
+  <text x="22" y="28" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="15" font-weight="700" fill="#3B2010" letter-spacing="-0.5">ZV</text>
+</svg>

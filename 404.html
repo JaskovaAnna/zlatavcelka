@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="Stránka nenalezena – Zlatá Včelka" />
+  <meta property="og:description" content="Zlatá Včelka – přírodní med přímo od včelaře." />
+  <meta property="og:url"         content="https://zlatavcelka.cz" />
+
+  <title>Stránka nenalezena – Zlatá Včelka</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="images/logo-hex.svg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo-hex.svg" alt="" class="logo__icon" />
+        <span class="logo__text"><em>Zlatá</em><br>Včelka</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Otevřít menu">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="nav">
+        <ul class="nav__list">
+          <li><a href="index.html#hero" class="nav__link" data-text="Úvod">Úvod</a></li>
+          <li><a href="index.html#about" class="nav__link" data-text="O nás">O nás</a></li>
+          <li><a href="index.html#products" class="nav__link" data-text="Výrobky">Výrobky</a></li>
+          <li><a href="index.html#contact" class="nav__link nav__link--cta">Kontakt</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="error-page">
+    <div class="container error-page__inner">
+      <div class="error-page__content">
+        <span class="error-page__code">404</span>
+        <h1 class="error-page__title">Stránka nenalezena</h1>
+        <p class="error-page__desc">
+          Jejda! Tato stránka se ztratila jako včela v cizí zahradě.<br>
+          Vraťte se zpět na hlavní stránku.
+        </p>
+        <a href="index.html" class="btn btn--primary">Zpět na hlavní stránku</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <a href="index.html" class="footer__logo">
+        <img src="images/logo-hex.svg" alt="" class="logo__icon" />
+        <span class="logo__text"><em>Zlatá</em><br>Včelka</span>
+      </a>
+      <nav class="footer__nav">
+        <a href="index.html#hero" data-text="Úvod">Úvod</a>
+        <a href="index.html#about" data-text="O nás">O nás</a>
+        <a href="index.html#products" data-text="Výrobky">Výrobky</a>
+        <a href="index.html#contact" data-text="Kontakt">Kontakt</a>
+      </nav>
+      <p class="footer__copy">&copy; 2026 Zlatá Včelka</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
