@@ -1167,8 +1167,7 @@ ul  { list-style: none; }
   }
   .product-modal__panel {
     border-radius: 1.5rem 1.5rem 0 0;
-    max-height: 88vh;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    max-height: 90vh;
     transform: translateY(100%);
   }
   .product-modal.open .product-modal__panel {
