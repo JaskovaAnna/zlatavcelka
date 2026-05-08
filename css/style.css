@@ -1167,14 +1167,11 @@ ul  { list-style: none; }
   }
   .product-modal__panel {
     border-radius: 1.5rem 1.5rem 0 0;
-    max-height: 97dvh;
+    max-height: 90vh;
     transform: translateY(100%);
   }
   .product-modal.open .product-modal__panel {
     transform: none;
-  }
-  .product-modal__close {
-    top: 1.75rem;
   }
   .product-modal__img {
     height: 180px;
