@@ -199,6 +199,13 @@ const modalTitle    = document.getElementById('modalTitle');
 const modalContent  = document.getElementById('modalContent');
 
 if (productModal) {
+  const modalPanel = productModal.querySelector('.product-modal__panel');
+
+  function applyPanelHeight() {
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    modalPanel.style.maxHeight = (vh - 20) + 'px';
+  }
+
   function openModal(key) {
     const data = productData[key];
     if (!data) return;
@@ -208,6 +215,11 @@ if (productModal) {
     modalTitle.textContent = data.title;
     modalContent.innerHTML = data.content;
 
+    applyPanelHeight();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', applyPanelHeight);
+    }
+
     productModal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(() => productModal.classList.add('open'));
@@ -216,6 +228,10 @@ if (productModal) {
 
   function closeModal() {
     productModal.classList.remove('open');
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', applyPanelHeight);
+    }
+    modalPanel.style.maxHeight = '';
 
     function onEnd(e) {
       if (e.target === productModal && e.propertyName === 'opacity') {
