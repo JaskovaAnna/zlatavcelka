@@ -317,10 +317,24 @@ if (reviewsCarousel) {
   function stopAuto()  { clearInterval(timer); }
 
   let touchStartX = 0;
-  function handleTouchStart(e) { touchStartX = e.touches[0].clientX; }
+  let touchStartY = 0;
+  let touchIsHorizontal = false;
+
+  function handleTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchIsHorizontal = false;
+  }
+  function handleTouchMove(e) {
+    const dx = Math.abs(e.touches[0].clientX - touchStartX);
+    const dy = Math.abs(e.touches[0].clientY - touchStartY);
+    if (!touchIsHorizontal && dx < 5 && dy < 5) return;
+    if (!touchIsHorizontal) touchIsHorizontal = dx > dy;
+    if (touchIsHorizontal) e.preventDefault();
+  }
   function handleTouchEnd(e) {
     const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) { stopAuto(); goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
+    if (Math.abs(diff) > 40) { stopAuto(); goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
   }
 
   dots.forEach(dot => dot.addEventListener('click', () => {
@@ -341,6 +355,7 @@ if (reviewsCarousel) {
     track.addEventListener('mouseenter', stopAuto);
     track.addEventListener('mouseleave', startAuto);
     reviewsCarousel.addEventListener('touchstart', handleTouchStart, { passive: true });
+    reviewsCarousel.addEventListener('touchmove',  handleTouchMove,  { passive: false });
     reviewsCarousel.addEventListener('touchend',   handleTouchEnd,   { passive: true });
     startAuto();
   }
@@ -365,6 +380,7 @@ if (reviewsCarousel) {
     track.removeEventListener('mouseenter', stopAuto);
     track.removeEventListener('mouseleave', startAuto);
     reviewsCarousel.removeEventListener('touchstart', handleTouchStart);
+    reviewsCarousel.removeEventListener('touchmove',  handleTouchMove);
     reviewsCarousel.removeEventListener('touchend',   handleTouchEnd);
     dots.forEach((d, i) => d.classList.toggle('active', i === 0));
   }
