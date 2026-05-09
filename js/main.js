@@ -290,21 +290,27 @@ if (reviewsCarousel) {
     dots.forEach((d, i) => d.classList.toggle('active', i === real));
   }
 
+  function afterTransition() {
+    busy = false;
+    if (current === 0)          { setPos(total, false); current = total; }
+    else if (current === total + 1) { setPos(1, false); current = 1; }
+  }
+
+  let jumpTimer;
   function goTo(idx) {
     if (busy) return;
     busy = true;
     current = idx;
     setPos(current, true);
     updateDots();
+    clearTimeout(jumpTimer);
+    jumpTimer = setTimeout(afterTransition, 500);
   }
 
-  track.addEventListener('transitionend', () => {
-    busy = false;
-    if (current === 0) {
-      setPos(total, false); current = total;
-    } else if (current === total + 1) {
-      setPos(1, false); current = 1;
-    }
+  track.addEventListener('transitionend', (e) => {
+    if (e.target !== track || e.propertyName !== 'transform') return;
+    clearTimeout(jumpTimer);
+    afterTransition();
   });
 
   function startAuto() { timer = setInterval(() => goTo(current + 1), 4000); }
