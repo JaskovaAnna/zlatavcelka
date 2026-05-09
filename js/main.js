@@ -321,20 +321,37 @@ if (reviewsCarousel) {
   let touchIsHorizontal = false;
 
   function handleTouchStart(e) {
+    if (busy) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchIsHorizontal = false;
+    stopAuto();
+    track.style.transition = 'none';
   }
   function handleTouchMove(e) {
-    const dx = Math.abs(e.touches[0].clientX - touchStartX);
-    const dy = Math.abs(e.touches[0].clientY - touchStartY);
-    if (!touchIsHorizontal && dx < 5 && dy < 5) return;
-    if (!touchIsHorizontal) touchIsHorizontal = dx > dy;
-    if (touchIsHorizontal) e.preventDefault();
+    if (busy) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (!touchIsHorizontal && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+    if (!touchIsHorizontal) {
+      if (Math.abs(dx) > Math.abs(dy)) {
+        touchIsHorizontal = true;
+      } else {
+        track.style.transition = 'transform 0.45s ease';
+        return;
+      }
+    }
+    e.preventDefault();
+    track.style.transform = `translateX(${-current * cardWidth() + dx}px)`;
   }
   function handleTouchEnd(e) {
     const diff = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) { stopAuto(); goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
+    if (touchIsHorizontal && Math.abs(diff) > 40) {
+      goTo(diff > 0 ? current + 1 : current - 1);
+    } else {
+      setPos(current, true);
+    }
+    startAuto();
   }
 
   dots.forEach(dot => dot.addEventListener('click', () => {
