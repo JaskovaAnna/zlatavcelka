@@ -99,6 +99,7 @@ const productData = {
     title: 'Náš med',
     image: 'images/med.jpg',
     imageAlt: 'Med',
+    prefill: 'Dobrý den, mám zájem o med. Prosím o více informací o aktuální nabídce druhů a cenách.',
     content: `
       <div class="modal-item">
         <h4>Květový med</h4>
@@ -122,6 +123,7 @@ const productData = {
     title: 'Svíčky z včelího vosku',
     image: 'images/svicky.jpg',
     imageAlt: 'Svíčky',
+    prefill: 'Dobrý den, mám zájem o svíčky z včelího vosku. Prosím o více informací ohledně aktuální nabídky tvarů a velikostí.',
     content: `
       <p>Naše svíčky jsou vyráběny ručně z přírodního včelího vosku. Na rozdíl od parafínových svíček jsou šetrnější k životnímu prostředí i vašemu zdraví.</p>
       <ul class="modal-list">
@@ -141,6 +143,7 @@ const productData = {
     title: 'Propolis',
     image: 'images/propolis.jpg',
     imageAlt: 'Propolis',
+    prefill: 'Dobrý den, mám zájem o propolis. Prosím o více informací o dostupných formách (tinktura / pevný blok) a cenách.',
     content: `
       <div class="modal-item">
         <h4>Co je propolis?</h4>
@@ -166,6 +169,7 @@ const productData = {
     title: 'Dárkové balíčky',
     image: 'images/darkove_sety.jpg',
     imageAlt: 'Dárkové balíčky',
+    prefill: 'Dobrý den, rád/a bych si objednal/a dárkový balíček. Prosím o více informací – možnosti složení a ceny.',
     content: `
       <p>Sestavíme pro vás dárkový set ze všeho nejlepšího, co naše včelí rodiny nabízejí – přesně na míru vašich přání a rozpočtu.</p>
       <div class="modal-item" style="margin-top:1.25rem;border-top:1px solid var(--color-border);padding-top:1.25rem;">
@@ -215,6 +219,13 @@ if (productModal) {
     modalTitle.textContent = data.title;
     modalContent.innerHTML = data.content;
 
+    if (data.prefill) {
+      const cta = document.createElement('div');
+      cta.className = 'modal-cta';
+      cta.innerHTML = `<button class="modal-cta-btn" data-prefill="${data.prefill}">Poptat produkt</button>`;
+      modalContent.appendChild(cta);
+    }
+
     applyPanelHeight();
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', applyPanelHeight);
@@ -255,6 +266,22 @@ if (productModal) {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && productModal.classList.contains('open')) closeModal();
   });
+
+  modalContent.addEventListener('click', e => {
+    const btn  = e.target.closest('.modal-cta-btn');
+    const link = e.target.closest('.modal-link');
+    if (!btn && !link) return;
+    e.preventDefault();
+    const prefill = btn ? btn.dataset.prefill : null;
+    closeModal();
+    setTimeout(() => {
+      if (prefill) {
+        const field = document.getElementById('message');
+        if (field) field.value = prefill;
+      }
+      document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+    }, 350);
+  });
 }
 
 // ===========================
@@ -263,137 +290,136 @@ if (productModal) {
 const reviewsCarousel = document.getElementById('reviewsCarousel');
 if (reviewsCarousel) {
   const track     = document.getElementById('reviewsTrack');
-  const counter   = document.getElementById('reviewsCounter');
+  const btnPrev   = document.getElementById('reviewsPrev');
+  const btnNext   = document.getElementById('reviewsNext');
   const origCards = Array.from(track.querySelectorAll('.review-card'));
   const total     = origCards.length;
   const mq        = window.matchMedia('(max-width: 899px)');
 
-  let current = 1;
-  let timer;
-  let busy    = false;
-  let active  = false;
+  let current    = 1;
+  let active     = false;
+  let busy       = false;
+  let cloneFirst, cloneLast;
+  let jumpTimer;
 
   function cardWidth() { return reviewsCarousel.offsetWidth; }
 
   function setPos(idx, animate) {
-    track.style.transition = animate ? 'transform 0.45s ease' : 'none';
-    track.style.transform  = `translateX(${-idx * cardWidth()}px)`;
+    if (animate) {
+      track.style.transition = 'transform 0.4s ease';
+      track.style.transform  = `translateX(${-idx * cardWidth()}px)`;
+    } else {
+      track.style.transition = 'none';
+      void track.offsetHeight; // force reflow – ensures transition:none is applied before transform changes
+      track.style.transform  = `translateX(${-idx * cardWidth()}px)`;
+    }
   }
 
-  function syncCardWidths() {
+  function syncWidths() {
     const w = cardWidth() + 'px';
     Array.from(track.children).forEach(c => { c.style.width = w; c.style.flexShrink = '0'; });
   }
 
-  function updateCounter() {
-    if (counter) counter.textContent = `${((current - 1 + total) % total) + 1} / ${total}`;
-  }
-
   function afterTransition() {
     busy = false;
-    if (current === 0)          { setPos(total, false); current = total; }
-    else if (current === total + 1) { setPos(1, false); current = 1; }
+    if (current === 0)              { setPos(total, false); current = total; }
+    else if (current === total + 1) { setPos(1,     false); current = 1;     }
   }
 
-  let jumpTimer;
   function goTo(idx) {
     if (busy) return;
     busy = true;
     current = idx;
     setPos(current, true);
-    updateCounter();
     clearTimeout(jumpTimer);
-    jumpTimer = setTimeout(afterTransition, 500);
+    jumpTimer = setTimeout(afterTransition, 450);
   }
 
-  track.addEventListener('transitionend', (e) => {
+  track.addEventListener('transitionend', e => {
     if (e.target !== track || e.propertyName !== 'transform') return;
     clearTimeout(jumpTimer);
     afterTransition();
   });
 
-  function startAuto() { timer = setInterval(() => goTo(current + 1), 4000); }
-  function stopAuto()  { clearInterval(timer); }
+  let touchStartX = 0, touchStartY = 0, touchIsH = false;
 
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchIsHorizontal = false;
-
-  function handleTouchStart(e) {
+  function onTouchStart(e) {
     if (busy) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
-    touchIsHorizontal = false;
-    stopAuto();
+    touchIsH = false;
     track.style.transition = 'none';
   }
-  function handleTouchMove(e) {
+  function onTouchMove(e) {
     if (busy) return;
     const dx = e.touches[0].clientX - touchStartX;
     const dy = e.touches[0].clientY - touchStartY;
-    if (!touchIsHorizontal && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
-    if (!touchIsHorizontal) {
-      if (Math.abs(dx) > Math.abs(dy)) {
-        touchIsHorizontal = true;
-      } else {
-        track.style.transition = 'transform 0.45s ease';
-        return;
-      }
+    if (!touchIsH && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+    if (!touchIsH) {
+      if (Math.abs(dx) > Math.abs(dy)) touchIsH = true;
+      else { track.style.transition = 'transform 0.4s ease'; return; }
     }
     e.preventDefault();
     track.style.transform = `translateX(${-current * cardWidth() + dx}px)`;
   }
-  function handleTouchEnd(e) {
+  function onTouchEnd(e) {
     const diff = touchStartX - e.changedTouches[0].clientX;
-    if (touchIsHorizontal && Math.abs(diff) > 40) {
-      goTo(diff > 0 ? current + 1 : current - 1);
-    } else {
-      setPos(current, true);
-    }
-    startAuto();
+    if (touchIsH && Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
+    else setPos(current, true);
   }
+
+  function onResize() { syncWidths(); setPos(current, false); }
+  function onPrev()   { goTo(current - 1); }
+  function onNext()   { goTo(current + 1); }
 
   function activate() {
     if (active) return;
     active = true;
-    track.insertBefore(origCards[total - 1].cloneNode(true), origCards[0]);
-    track.appendChild(origCards[0].cloneNode(true));
-    current = 1;
-    syncCardWidths();
-    setPos(current, false);
-    updateCounter();
-    window.addEventListener('resize', syncAndRepos);
-    track.addEventListener('mouseenter', stopAuto);
-    track.addEventListener('mouseleave', startAuto);
-    reviewsCarousel.addEventListener('touchstart', handleTouchStart, { passive: true });
-    reviewsCarousel.addEventListener('touchmove',  handleTouchMove,  { passive: false });
-    reviewsCarousel.addEventListener('touchend',   handleTouchEnd,   { passive: true });
-    startAuto();
-  }
 
-  function syncAndRepos() {
-    syncCardWidths();
+    // Strip reveal animation from originals so clones inherit a clean, visible state
+    origCards.forEach(c => {
+      c.style.transition = 'none';
+      c.classList.remove('reveal');
+      c.classList.add('revealed');
+    });
+
+    cloneLast  = origCards[total - 1].cloneNode(true);
+    cloneFirst = origCards[0].cloneNode(true);
+    cloneLast.setAttribute('aria-hidden', 'true');
+    cloneFirst.setAttribute('aria-hidden', 'true');
+    track.insertBefore(cloneLast, origCards[0]);
+    track.appendChild(cloneFirst);
+
+    current = 1;
+    syncWidths();
     setPos(current, false);
+
+    btnPrev.addEventListener('click', onPrev);
+    btnNext.addEventListener('click', onNext);
+    reviewsCarousel.addEventListener('touchstart', onTouchStart, { passive: true });
+    reviewsCarousel.addEventListener('touchmove',  onTouchMove,  { passive: false });
+    reviewsCarousel.addEventListener('touchend',   onTouchEnd,   { passive: true });
+    window.addEventListener('resize', onResize);
   }
 
   function deactivate() {
     if (!active) return;
     active = false;
-    busy   = false;
-    stopAuto();
-    window.removeEventListener('resize', syncAndRepos);
-    track.removeChild(track.children[0]);
-    track.removeChild(track.children[track.children.length - 1]);
+    busy = false;
+    clearTimeout(jumpTimer);
+    if (cloneLast  && cloneLast.parentNode)  track.removeChild(cloneLast);
+    if (cloneFirst && cloneFirst.parentNode) track.removeChild(cloneFirst);
+    cloneLast = null; cloneFirst = null;
     Array.from(track.children).forEach(c => { c.style.width = ''; c.style.flexShrink = ''; });
     track.style.transform  = '';
     track.style.transition = '';
     current = 1;
-    track.removeEventListener('mouseenter', stopAuto);
-    track.removeEventListener('mouseleave', startAuto);
-    reviewsCarousel.removeEventListener('touchstart', handleTouchStart);
-    reviewsCarousel.removeEventListener('touchmove',  handleTouchMove);
-    reviewsCarousel.removeEventListener('touchend',   handleTouchEnd);
-    if (counter) counter.textContent = `1 / ${total}`;
+    btnPrev.removeEventListener('click', onPrev);
+    btnNext.removeEventListener('click', onNext);
+    reviewsCarousel.removeEventListener('touchstart', onTouchStart);
+    reviewsCarousel.removeEventListener('touchmove',  onTouchMove);
+    reviewsCarousel.removeEventListener('touchend',   onTouchEnd);
+    window.removeEventListener('resize', onResize);
   }
 
   mq.addEventListener('change', e => e.matches ? activate() : deactivate());
