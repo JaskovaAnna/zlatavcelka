@@ -263,7 +263,7 @@ if (productModal) {
 const reviewsCarousel = document.getElementById('reviewsCarousel');
 if (reviewsCarousel) {
   const track     = document.getElementById('reviewsTrack');
-  const dots      = reviewsCarousel.querySelectorAll('.reviews__dot');
+  const counter   = document.getElementById('reviewsCounter');
   const origCards = Array.from(track.querySelectorAll('.review-card'));
   const total     = origCards.length;
   const mq        = window.matchMedia('(max-width: 899px)');
@@ -285,9 +285,8 @@ if (reviewsCarousel) {
     Array.from(track.children).forEach(c => { c.style.width = w; c.style.flexShrink = '0'; });
   }
 
-  function updateDots() {
-    const real = ((current - 1) + total) % total;
-    dots.forEach((d, i) => d.classList.toggle('active', i === real));
+  function updateCounter() {
+    if (counter) counter.textContent = `${((current - 1 + total) % total) + 1} / ${total}`;
   }
 
   function afterTransition() {
@@ -302,7 +301,7 @@ if (reviewsCarousel) {
     busy = true;
     current = idx;
     setPos(current, true);
-    updateDots();
+    updateCounter();
     clearTimeout(jumpTimer);
     jumpTimer = setTimeout(afterTransition, 500);
   }
@@ -354,11 +353,6 @@ if (reviewsCarousel) {
     startAuto();
   }
 
-  dots.forEach(dot => dot.addEventListener('click', () => {
-    if (!active) return;
-    stopAuto(); goTo(+dot.dataset.index + 1); startAuto();
-  }));
-
   function activate() {
     if (active) return;
     active = true;
@@ -367,7 +361,7 @@ if (reviewsCarousel) {
     current = 1;
     syncCardWidths();
     setPos(current, false);
-    updateDots();
+    updateCounter();
     window.addEventListener('resize', syncAndRepos);
     track.addEventListener('mouseenter', stopAuto);
     track.addEventListener('mouseleave', startAuto);
@@ -399,7 +393,7 @@ if (reviewsCarousel) {
     reviewsCarousel.removeEventListener('touchstart', handleTouchStart);
     reviewsCarousel.removeEventListener('touchmove',  handleTouchMove);
     reviewsCarousel.removeEventListener('touchend',   handleTouchEnd);
-    dots.forEach((d, i) => d.classList.toggle('active', i === 0));
+    if (counter) counter.textContent = `1 / ${total}`;
   }
 
   mq.addEventListener('change', e => e.matches ? activate() : deactivate());
