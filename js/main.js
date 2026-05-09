@@ -340,8 +340,8 @@ if (reviewsCarousel) {
     window.addEventListener('resize', syncAndRepos);
     track.addEventListener('mouseenter', stopAuto);
     track.addEventListener('mouseleave', startAuto);
-    track.addEventListener('touchstart', handleTouchStart, { passive: true });
-    track.addEventListener('touchend',   handleTouchEnd,   { passive: true });
+    reviewsCarousel.addEventListener('touchstart', handleTouchStart, { passive: true });
+    reviewsCarousel.addEventListener('touchend',   handleTouchEnd,   { passive: true });
     startAuto();
   }
 
@@ -364,8 +364,8 @@ if (reviewsCarousel) {
     current = 1;
     track.removeEventListener('mouseenter', stopAuto);
     track.removeEventListener('mouseleave', startAuto);
-    track.removeEventListener('touchstart', handleTouchStart);
-    track.removeEventListener('touchend',   handleTouchEnd);
+    reviewsCarousel.removeEventListener('touchstart', handleTouchStart);
+    reviewsCarousel.removeEventListener('touchend',   handleTouchEnd);
     dots.forEach((d, i) => d.classList.toggle('active', i === 0));
   }
 

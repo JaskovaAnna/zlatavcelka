@@ -580,16 +580,26 @@ ul  { list-style: none; }
 }
 
 .reviews__dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.reviews__dot::before {
+  content: '';
+  display: block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: none;
   background: var(--color-border);
-  cursor: pointer;
-  padding: 0;
   transition: background var(--transition), transform var(--transition);
 }
-.reviews__dot.active {
+.reviews__dot.active::before {
   background: var(--color-honey);
   transform: scale(1.3);
 }
