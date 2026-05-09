@@ -48,7 +48,7 @@ sections.forEach(s => sectionObserver.observe(s));
 // SCROLL REVEAL ANIMATION
 // ===========================
 const revealEls = document.querySelectorAll(
-  '.product-card, .about__inner, .contact__content, .section-header'
+  '.product-card, .review-card, .about__inner, .contact__content, .section-header'
 );
 
 const revealObserver = new IntersectionObserver(entries => {
@@ -83,7 +83,7 @@ if (contactForm) contactForm.addEventListener('submit', async e => {
   // Simulate async send (replace with real fetch / emailjs / etc.)
   await new Promise(resolve => setTimeout(resolve, 1200));
 
-  formNotice.textContent = '✓ Zpráva byla odeslána. Brzy se vám ozveme!';
+  formNotice.textContent = 'Vaše zpráva právě přistála v našem úlu. Brzy se Vám ozveme!';
   formNotice.className   = 'form-notice success';
   contactForm.reset();
 
@@ -255,4 +255,114 @@ if (productModal) {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && productModal.classList.contains('open')) closeModal();
   });
+}
+
+// ===========================
+// REVIEWS CAROUSEL
+// ===========================
+const reviewsCarousel = document.getElementById('reviewsCarousel');
+if (reviewsCarousel) {
+  const track     = document.getElementById('reviewsTrack');
+  const dots      = reviewsCarousel.querySelectorAll('.reviews__dot');
+  const origCards = Array.from(track.querySelectorAll('.review-card'));
+  const total     = origCards.length;
+  const mq        = window.matchMedia('(max-width: 899px)');
+
+  let current = 1;
+  let timer;
+  let busy    = false;
+  let active  = false;
+
+  function cardWidth() { return reviewsCarousel.offsetWidth; }
+
+  function setPos(idx, animate) {
+    track.style.transition = animate ? 'transform 0.45s ease' : 'none';
+    track.style.transform  = `translateX(${-idx * cardWidth()}px)`;
+  }
+
+  function syncCardWidths() {
+    const w = cardWidth() + 'px';
+    Array.from(track.children).forEach(c => { c.style.width = w; c.style.flexShrink = '0'; });
+  }
+
+  function updateDots() {
+    const real = ((current - 1) + total) % total;
+    dots.forEach((d, i) => d.classList.toggle('active', i === real));
+  }
+
+  function goTo(idx) {
+    if (busy) return;
+    busy = true;
+    current = idx;
+    setPos(current, true);
+    updateDots();
+  }
+
+  track.addEventListener('transitionend', () => {
+    busy = false;
+    if (current === 0) {
+      setPos(total, false); current = total;
+    } else if (current === total + 1) {
+      setPos(1, false); current = 1;
+    }
+  });
+
+  function startAuto() { timer = setInterval(() => goTo(current + 1), 4000); }
+  function stopAuto()  { clearInterval(timer); }
+
+  let touchStartX = 0;
+  function handleTouchStart(e) { touchStartX = e.touches[0].clientX; }
+  function handleTouchEnd(e) {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { stopAuto(); goTo(diff > 0 ? current + 1 : current - 1); startAuto(); }
+  }
+
+  dots.forEach(dot => dot.addEventListener('click', () => {
+    if (!active) return;
+    stopAuto(); goTo(+dot.dataset.index + 1); startAuto();
+  }));
+
+  function activate() {
+    if (active) return;
+    active = true;
+    track.insertBefore(origCards[total - 1].cloneNode(true), origCards[0]);
+    track.appendChild(origCards[0].cloneNode(true));
+    current = 1;
+    syncCardWidths();
+    setPos(current, false);
+    updateDots();
+    window.addEventListener('resize', syncAndRepos);
+    track.addEventListener('mouseenter', stopAuto);
+    track.addEventListener('mouseleave', startAuto);
+    track.addEventListener('touchstart', handleTouchStart, { passive: true });
+    track.addEventListener('touchend',   handleTouchEnd,   { passive: true });
+    startAuto();
+  }
+
+  function syncAndRepos() {
+    syncCardWidths();
+    setPos(current, false);
+  }
+
+  function deactivate() {
+    if (!active) return;
+    active = false;
+    busy   = false;
+    stopAuto();
+    window.removeEventListener('resize', syncAndRepos);
+    track.removeChild(track.children[0]);
+    track.removeChild(track.children[track.children.length - 1]);
+    Array.from(track.children).forEach(c => { c.style.width = ''; c.style.flexShrink = ''; });
+    track.style.transform  = '';
+    track.style.transition = '';
+    current = 1;
+    track.removeEventListener('mouseenter', stopAuto);
+    track.removeEventListener('mouseleave', startAuto);
+    track.removeEventListener('touchstart', handleTouchStart);
+    track.removeEventListener('touchend',   handleTouchEnd);
+    dots.forEach((d, i) => d.classList.toggle('active', i === 0));
+  }
+
+  mq.addEventListener('change', e => e.matches ? activate() : deactivate());
+  if (mq.matches) activate();
 }
